@@ -22,3 +22,6 @@ void customerManagementMenu(){
     	scanf("%d", &choice);
     	getchar();
 }
+
+
+

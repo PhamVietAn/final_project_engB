@@ -91,18 +91,13 @@ void saveBooks(){
 }
 
 void showBooks(){
-	
     printf("	   ***All Books***   \n");
     printf("	=====================\n");
     if(bookCount==0){
     	printf("	No books in the library\n");
 	}
-    for(int i = 0; i < bookCount; i++){
-//        printf("	| ID: %s | Title: %s | Author: %s | Quantity: %d | Price: %.1f | Publication: %02d-%02d-%04d |\n",
-//               books[i].bookId, books[i].title, books[i].author, books[i].quantity, books[i].price,
-//               books[i].publication.day, books[i].publication.month, books[i].publication.year);
-               
-        printf("	| ID: %-7s | Title: %-8s | Author: %-9s | Quantity: %-2d | Price: %-8.1f | Publication: %02d-%02d-%04d |\n",
+    for(int i = 0; i < bookCount; i++){           
+        printf("	| ID: %-7s | Title: %-8s | Author: %-8s | Quantity: %-3d | Price: %-8.1f | Publication: %02d-%02d-%04d |\n",
     		books[i].bookId, books[i].title, books[i].author, books[i].quantity, books[i].price,
        		books[i].publication.day, books[i].publication.month, books[i].publication.year);
 
@@ -143,8 +138,8 @@ void menuAddBooks(){
 
 void addBooks(){
 	system("cls");
-    printf("	   ***Add Books***   \n");
-    printf("	=====================\n");
+    printf("	    ***Add Books***   \n");
+    printf("	=======================\n");
     if(bookCount >= 100){
         printf("	Library is full. Cannot add more books.\n");
         getchar();
@@ -152,35 +147,76 @@ void addBooks(){
     }
 
     struct Book *newBook = &books[bookCount];
+    
+    
+	int isDuplicate;
+    do{
+        isDuplicate = 0;
+        printf("	Enter book ID (7 characters): ");
+        fgets(newBook->bookId, 10, stdin);
+        newBook->bookId[strcspn(newBook->bookId, "\n")] = 0;
+        
+        if(strlen(newBook->bookId) != 7){
+            printf("	Book ID must be exactly 7 characters.\n");
+            continue;
+        }
 
-    printf("	Enter book ID: ");
-    fgets(newBook->bookId, 10, stdin);
-    newBook->bookId[strcspn(newBook->bookId, "\n")] = 0;
+        for(int i = 0; i < bookCount; i++){
+            if(strcmp(books[i].bookId, newBook->bookId) == 0){
+                printf("	Book ID already exists. Please enter a unique ID.\n");
+                isDuplicate = 1;
+                break;
+            }
+        }
+    }while(isDuplicate);
 
-    printf("	Enter title: ");
-    fgets(newBook->title, 30, stdin);
-    newBook->title[strcspn(newBook->title, "\n")] = 0;
+	do{
+        isDuplicate = 0;
+        printf("	Enter title (Max 8 characters): ");
+        fgets(newBook->title, 30, stdin);
+        newBook->title[strcspn(newBook->title, "\n")] = 0;
+        
+        if(strlen(newBook->title) > 8 || strlen(newBook->title) < 1){
+            printf("	Title must be between 1 and 8 characters.\n");
+            continue;
+        }
 
-    printf("	Enter author: ");
+        for(int i = 0; i < bookCount; i++){
+            if(strcmp(books[i].title, newBook->title) == 0){
+                printf("	Title already exists. Please enter a unique title.\n");
+                isDuplicate = 1;
+                break;
+            }
+        }
+    }while(isDuplicate);
+	
+	while(strlen(newBook->author)>8 || strlen(newBook->author)<1){
+    printf("	Enter author (Max 8 character): ");
     fgets(newBook->author, 20, stdin);
     newBook->author[strcspn(newBook->author, "\n")] = 0;
+	}
+	
+	do{
+        printf("	Enter quantity (Max 999): ");
+        scanf("%d", &newBook->quantity);
+        while(getchar() != '\n');
+    }while(newBook->quantity < 1 || newBook->quantity > 999);
 
-    printf("	Enter quantity: ");
-    scanf("%d", &newBook->quantity);
-    while (getchar() != '\n');
-
-    printf("	Enter price: ");
-    scanf("%f", &newBook->price);
-    while (getchar() != '\n');
-
+	
+	do{
+        printf("	Enter price (Max 999999): ");
+        scanf("%f", &newBook->price);
+        while(getchar() != '\n');
+    }while(newBook->price < 1 || newBook->price > 999999);
+	
     printf("	Enter publication date (dd mm yyyy): ");
     scanf("%d %d %d", &newBook->publication.day, &newBook->publication.month, &newBook->publication.year);
-    while (getchar() != '\n');
+    while(getchar() != '\n');
 
     bookCount++;
     saveBooks();
 
-    printf("	=====================\n");
+    printf("	=======================\n");
     printf("	Book added successfully!\n");
     printf("	Press Enter to return to menu.\n");
     getchar();
@@ -215,35 +251,51 @@ void menuEditBook(){
 }
 
 void editBook(){
-	char id[10];
-	system("cls");
-    printf("	       ***Edit Books***   \n");
+    char id[10];
+    system("cls");
+    printf("		   ***Edit Books***   \n");
     printf("	==============================\n");
-    printf("	Enter book ID to edit: ");
+    printf("    Enter book ID to edit: ");
     fgets(id, sizeof(id), stdin);
     id[strcspn(id, "\n")] = 0;
 
     for(int i = 0; i < bookCount; i++){
         if(strcmp(books[i].bookId, id) == 0){
             printf("	Editing book: %s\n", books[i].title);
-            printf("	Author: %s\n",books[i].author);
-            printf("	Quantity: %d\n",books[i].quantity);
-            printf("	Price: %.1f\n",books[i].price);
-            printf("	Publication: %02d-%02d-%04d\n",books[i].publication.day, books[i].publication.month, books[i].publication.year);
-            
-            char temp[30];
-            
-            printf("\n	Enter new title: ");
-            fgets(temp, sizeof(temp), stdin);
-            if(strcmp(temp, "\n") != 0){
-                temp[strcspn(temp, "\n")] = 0;
-                strcpy(books[i].title, temp);
-            }
+            printf("	Author: %s\n", books[i].author);
+            printf("	Quantity: %d\n", books[i].quantity);
+            printf("	Price: %.1f\n", books[i].price);
+            printf("	Publication: %02d-%02d-%04d\n", books[i].publication.day, books[i].publication.month, books[i].publication.year);
 
-            printf("	Enter new author: ");
-            fgets(temp, 20, stdin);
-            if(strcmp(temp, "\n") != 0){
+            char temp[30];
+            int isDuplicate;
+
+            do{
+                isDuplicate = 0;
+                printf("\n	Enter new title (Max 8 characters): ");
+                fgets(temp, sizeof(temp), stdin);
                 temp[strcspn(temp, "\n")] = 0;
+
+                if(strlen(temp) > 8 || strlen(temp) < 1){
+                    printf("	Title must be between 1 and 8 characters.\n");
+                    continue;
+                }
+
+                for(int j = 0; j < bookCount; j++){
+                    if(j != i && strcmp(books[j].title, temp) == 0){
+                        printf("	Title already exists. Please enter a unique title.\n");
+                        isDuplicate = 1;
+                        break;
+                    }
+                }
+            } while(isDuplicate);
+
+            strcpy(books[i].title, temp);
+
+            printf("	Enter new author (Max 8 characters): ");
+            fgets(temp, sizeof(temp), stdin);
+            temp[strcspn(temp, "\n")] = 0;
+            if(strlen(temp) > 0){
                 strcpy(books[i].author, temp);
             }
 
@@ -251,7 +303,7 @@ void editBook(){
             int newQuantity;
             scanf("%d", &newQuantity);
             books[i].quantity = newQuantity;
-            
+
             printf("	Enter new price: ");
             float newPrice;
             scanf("%f", &newPrice);
@@ -264,18 +316,19 @@ void editBook(){
             books[i].publication.month = month;
             books[i].publication.year = year;
             getchar();
+
             saveBooks();
-            
+
             printf("	==============================\n");
             printf("	Book updated successfully!\n");
             printf("	Press Enter to return to menu.\n");
-    		getchar();
+            getchar();
             return;
         }
     }
     printf("	Book not found!\n");
     printf("	Press Enter to return to menu.\n");
-   	getchar();
+    getchar();
 }
 
 void menuDeleteBook(){
